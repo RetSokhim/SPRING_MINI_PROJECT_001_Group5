@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: Spring_Mini_Project
+  datasource:
+    url: jdbc:postgresql://localhost:5432/article_db
+    username: postgres
+    password: 092367169
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
