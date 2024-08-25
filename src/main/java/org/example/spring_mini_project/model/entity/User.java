@@ -34,7 +34,7 @@ public class User {
     private LocalDateTime updatedAt;
     @OneToMany(mappedBy = "user")
     private List<Comment> comments;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Category> categories;
     @OneToMany(mappedBy = "user")
     private List<Article> articles;
