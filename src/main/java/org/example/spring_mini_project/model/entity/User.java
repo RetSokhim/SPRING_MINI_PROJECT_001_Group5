@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.spring_mini_project.model.enumeration.Role;
+import org.example.spring_mini_project.model.response.UserRegisterResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,10 +33,16 @@ public class User {
     private String phoneNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Comment> comments;
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Category> categories;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Article> articles;
+
+    public UserRegisterResponse toResponse(){
+        return new UserRegisterResponse(this.userId,
+                this.username,this.email,this.role.name(),this.address,this.phoneNumber,this.createdAt
+                );
+    }
 }

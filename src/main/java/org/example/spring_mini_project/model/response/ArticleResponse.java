@@ -18,7 +18,11 @@ public class ArticleResponse {
     private String title;
     private String description;
     private LocalDateTime createdAt;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private LocalDateTime updatedAt;
     private Long ownerOfArticle;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Long> categoryList;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<CommentResponse> comments;
 }

@@ -26,7 +26,7 @@ public class Category {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category",cascade = CascadeType.ALL)
     private List<CategoryArticle> categoryArticles;
 
     public CategoryResponse toResponse(){

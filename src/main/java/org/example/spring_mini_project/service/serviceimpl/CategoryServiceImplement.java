@@ -5,7 +5,6 @@ import org.example.spring_mini_project.model.entity.User;
 import org.example.spring_mini_project.model.enumeration.SortDirection;
 import org.example.spring_mini_project.model.request.CategoryRequest;
 import org.example.spring_mini_project.model.response.CategoryResponse;
-import org.example.spring_mini_project.repository.ArticleRepository;
 import org.example.spring_mini_project.repository.CategoryArticleRepository;
 import org.example.spring_mini_project.repository.CategoryRepository;
 import org.example.spring_mini_project.repository.UserRepository;
@@ -34,8 +33,7 @@ public class CategoryServiceImplement implements CategoryService {
 
     @Override
     public CategoryResponse createNewCategory(CategoryRequest categoryRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findUserByEmail(authentication.getName());
+        User user = userRepository.findUserByEmail(getUserCurrentEmail());
         Category category = categoryRequest.toCategory();
         category.setUser(user);
         categoryRepository.save(category);
@@ -46,8 +44,7 @@ public class CategoryServiceImplement implements CategoryService {
 
     @Override
     public CategoryResponse getCategoryById(Long categoryId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Category category = categoryRepository.findCategoryByUserEmailAndCategoryId(authentication.getName(),categoryId);
+        Category category = categoryRepository.findCategoryByUserEmailAndCategoryId(getUserCurrentEmail(),categoryId);
         CategoryResponse categoryResponse = category.toResponse();
         categoryResponse.setAmountOfArticle(categoryArticleRepository.countAllByCategoryCategoryId(categoryId));
         return categoryResponse;
@@ -58,8 +55,7 @@ public class CategoryServiceImplement implements CategoryService {
         Sort sort = sortDirection.name().equalsIgnoreCase(Sort.Direction.ASC.name())?
                 Sort.by(sortBy).ascending():Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber-1,pageSize,sort);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return categoryRepository.findAllByUserEmail(pageable,authentication.getName())
+        return categoryRepository.findAllByUserEmail(pageable,getUserCurrentEmail())
                 .getContent().stream().map(category -> {
                     CategoryResponse categoryResponse = category.toResponse();
                     categoryResponse.setAmountOfArticle(categoryArticleRepository.countAllByCategoryCategoryId(category.getCategoryId()));
@@ -69,8 +65,7 @@ public class CategoryServiceImplement implements CategoryService {
 
     @Override
     public CategoryResponse updateCategoryById(Long categoryId, CategoryRequest categoryRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Category category = categoryRepository.findCategoryByCategoryIdAndUserEmail(categoryId,authentication.getName()).orElseThrow();
+        Category category = categoryRepository.findCategoryByCategoryIdAndUserEmail(categoryId,getUserCurrentEmail()).orElseThrow();
         category.setUpdatedAt(LocalDateTime.now());
         category.setCategoryName(categoryRequest.getCategoryName());
         CategoryResponse categoryResponse = categoryRepository.save(category).toResponse();
@@ -80,7 +75,11 @@ public class CategoryServiceImplement implements CategoryService {
 
     @Override
     public void deleteCategoryById(Long categoryId) {
+        categoryRepository.deleteCategoryByUserEmailAndCategoryId(getUserCurrentEmail(),categoryId);
+    }
+
+    public String getUserCurrentEmail(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        categoryRepository.deleteCategoryByUserEmailAndCategoryId(authentication.getName(),categoryId);
+        return authentication.getName();
     }
 }
