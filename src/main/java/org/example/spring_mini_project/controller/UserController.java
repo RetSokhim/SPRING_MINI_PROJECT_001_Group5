@@ -2,6 +2,8 @@ package org.example.spring_mini_project.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import org.example.spring_mini_project.model.enumeration.Role;
 import org.example.spring_mini_project.model.request.UserRegisterRequest;
 import org.example.spring_mini_project.model.response.ApiResponse;
 import org.example.spring_mini_project.model.response.UserRegisterResponse;
@@ -21,23 +23,27 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    @PutMapping
-    public ResponseEntity<?> updateCurrentUser(@RequestBody UserRegisterRequest userRegisterRequest) {
-        UserRegisterResponse userRegisterResponse=userService.updateCurrentUser(userRegisterRequest);
-        return new ResponseEntity<>(new ApiResponse<>("update current user successfully",
-                HttpStatus.CREATED,userRegisterResponse,201, LocalDateTime.now()
-        ), HttpStatus.CREATED);
-    }
-    @GetMapping
-    public ResponseEntity<?> getCurrentUser() {
-        UserRegisterResponse userRegisterResponse=userService.getCurrentUser();
-        return new ResponseEntity<>(new ApiResponse<>("get current user successfully",
+    @PutMapping("/current-user")
+    public ResponseEntity<?> updateCurrentUser(@Valid @RequestBody UserRegisterRequest userRegisterRequest, @RequestParam Role role) {
+        UserRegisterResponse userRegisterResponse = userService.updateCurrentUser(userRegisterRequest, role);
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Update current user successfully",
                 HttpStatus.CREATED,
                 userRegisterResponse,
                 201,
                 LocalDateTime.now()
-        ),
-                HttpStatus.OK
-        );
+        ), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/current-user")
+    public ResponseEntity<?> getCurrentUser() {
+        UserRegisterResponse userRegisterResponse = userService.getCurrentUser();
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Get current user successfully",
+                HttpStatus.OK,
+                userRegisterResponse,
+                200,
+                LocalDateTime.now()
+        ), HttpStatus.OK);
     }
 }
