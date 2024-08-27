@@ -24,7 +24,7 @@ public class ArticleController {
         this.articleService = articleService;
     }
 
-    @PostMapping("/create-category")
+    @PostMapping("/create-article")
     public ResponseEntity<?> createNewArticle(@Valid @RequestBody ArticleRequest articleRequest) {
         ArticleResponse articleResponse = articleService.createNewCategory(articleRequest);
         return new ResponseEntity<>(new ApiResponse<>("Article Created Successfully",

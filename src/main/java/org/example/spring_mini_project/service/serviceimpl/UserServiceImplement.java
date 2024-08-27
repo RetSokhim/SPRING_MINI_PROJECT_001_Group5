@@ -15,6 +15,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class UserServiceImplement implements UserService {
     private final UserRepository userRepository;
@@ -55,7 +57,7 @@ public class UserServiceImplement implements UserService {
                 user.setEmail(userRegisterRequest.getEmail());
                 user.setAddress(userRegisterRequest.getAddress());
                 user.setPhoneNumber(userRegisterRequest.getPhoneNumber());
-
+                user.setUpdatedAt(LocalDateTime.now());
                 // Update the role if it's provided and different
                 if (!user.getRole().equals(role)) {
                     user.setRole(role);
