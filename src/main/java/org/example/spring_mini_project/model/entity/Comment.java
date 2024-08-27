@@ -30,6 +30,6 @@ public class Comment {
     private Article article;
 
     public CommentResponse toResponse(){
-        return new CommentResponse(this.commentId,this.cmt,this.createdAt,this.user.toResponse());
+        return new CommentResponse(this.commentId,this.cmt,this.createdAt,this.user.toResponse(),this.updatedAt);
     }
 }

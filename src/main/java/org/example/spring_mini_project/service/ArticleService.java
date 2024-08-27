@@ -2,8 +2,8 @@ package org.example.spring_mini_project.service;
 
 import org.example.spring_mini_project.model.enumeration.SortDirection;
 import org.example.spring_mini_project.model.request.ArticleRequest;
+import org.example.spring_mini_project.model.request.CommentRequest;
 import org.example.spring_mini_project.model.response.ArticleResponse;
-import org.example.spring_mini_project.model.response.CommentRequest;
 
 import java.util.List;
 

@@ -4,11 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 
-@Getter
 @Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentResponse {
@@ -16,4 +15,5 @@ public class CommentResponse {
     private String cmt;
     private LocalDateTime createdAt;
     private UserRegisterResponse user;
+    private LocalDateTime updatedAt;
 }

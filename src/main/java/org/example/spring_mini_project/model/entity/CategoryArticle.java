@@ -1,10 +1,7 @@
 package org.example.spring_mini_project.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "category_article")
+
 public class CategoryArticle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

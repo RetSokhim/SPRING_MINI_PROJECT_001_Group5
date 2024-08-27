@@ -35,21 +35,23 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequest userRegisterRequest,
                                       @RequestParam Role role
-                                      ) {
-        UserRegisterResponse authRegister = userService.createNewUser(userRegisterRequest,role);
+    ) {
+        UserRegisterResponse authRegister = userService.createNewUser(userRegisterRequest, role);
         return new ResponseEntity<>(new ApiResponse<>("Register Successfully",
-                HttpStatus.CREATED,authRegister,201, LocalDateTime.now()
-                ), HttpStatus.CREATED);
+                HttpStatus.CREATED, authRegister, 201, LocalDateTime.now()
+        ), HttpStatus.CREATED);
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginRequest userLoginRequest) throws Exception {
         authenticate(userLoginRequest.getEmail(), userLoginRequest.getPassword());
         final UserDetails userDetails = userService.loadUserByUsername(userLoginRequest.getEmail());
         final String token = jwtService.generateToken(userDetails);
         return new ResponseEntity<>(new ApiResponse<>("Login successfully",
-                HttpStatus.OK,token,200,LocalDateTime.now()
-                ),HttpStatus.OK);
+                HttpStatus.OK, token, 200, LocalDateTime.now()
+        ), HttpStatus.OK);
     }
+
     private void authenticate(String email, String password) throws Exception {
         try {
 //            UserDetails user = userService.loadUserByUsername(email);
