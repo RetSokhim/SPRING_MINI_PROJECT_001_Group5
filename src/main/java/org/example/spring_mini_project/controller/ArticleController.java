@@ -2,6 +2,7 @@ package org.example.spring_mini_project.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import org.example.spring_mini_project.model.enumeration.SortArticle;
 import org.example.spring_mini_project.model.enumeration.SortDirection;
 import org.example.spring_mini_project.model.request.ArticleRequest;
 import org.example.spring_mini_project.model.request.CommentRequest;
@@ -24,7 +25,7 @@ public class ArticleController {
         this.articleService = articleService;
     }
 
-    @PostMapping("/create-category")
+    @PostMapping("/create-article")
     public ResponseEntity<?> createNewArticle(@Valid @RequestBody ArticleRequest articleRequest) {
         ArticleResponse articleResponse = articleService.createNewCategory(articleRequest);
         return new ResponseEntity<>(new ApiResponse<>("Article Created Successfully",
@@ -41,9 +42,9 @@ public class ArticleController {
     }
 
     @GetMapping("/get-all-article")
-    public ResponseEntity<?> getAllArticle(@RequestParam Integer pageNumber,
-                                           @RequestParam Integer pageSize,
-                                           @RequestParam String sortBy,
+    public ResponseEntity<?> getAllArticle(@RequestParam(defaultValue = "1") Integer pageNumber,
+                                           @RequestParam(defaultValue = "5") Integer pageSize,
+                                           @RequestParam SortArticle sortBy,
                                            @RequestParam SortDirection sortDirection
     ) {
         List<ArticleResponse> articleResponses = articleService.getAllArticle(pageNumber,pageSize,sortBy,sortDirection);
@@ -53,7 +54,7 @@ public class ArticleController {
     }
 
     @PutMapping("/update-article/{articleId}")
-    public ResponseEntity<?> updateArticleById(@RequestBody ArticleRequest articleRequest,@PathVariable Long articleId) {
+    public ResponseEntity<?> updateArticleById(@Valid @RequestBody ArticleRequest articleRequest,@PathVariable Long articleId) {
         ArticleResponse articleResponse = articleService.updateArticleById(articleRequest,articleId);
         return new ResponseEntity<>(new ApiResponse<>("Updated article with ID : "+articleId+" Successfully",
                 HttpStatus.OK,articleResponse,200, LocalDateTime.now()
@@ -77,7 +78,7 @@ public class ArticleController {
     }
 
     @PostMapping("post-comment/{articleId}")
-    public ResponseEntity<?> postCommentInArticle(@PathVariable Long articleId, @RequestBody CommentRequest commentRequest){
+    public ResponseEntity<?> postCommentInArticle(@PathVariable Long articleId,@Valid @RequestBody CommentRequest commentRequest){
         ArticleResponse articleResponse = articleService.postCommentToArticle(articleId,commentRequest);
         return new ResponseEntity<>(new ApiResponse<>("Add comment on article with ID : "+articleId+" Successfully",
                 HttpStatus.OK,articleResponse,200, LocalDateTime.now()

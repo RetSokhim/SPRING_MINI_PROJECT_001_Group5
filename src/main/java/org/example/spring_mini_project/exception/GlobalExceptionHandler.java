@@ -1,18 +1,20 @@
 package org.example.spring_mini_project.exception;
 
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.example.spring_mini_project.model.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.HandlerMethodValidationException;
+
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -58,31 +60,45 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+    public ProblemDetail methodArgumentNotValidException (MethodArgumentNotValidException e){
+        HashMap<String,String> errors = new HashMap<>();
+        for (FieldError error : e.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
-        ErrorResponse errorResponse = new ErrorResponse(
-                errors.toString(),
-                HttpStatus.BAD_REQUEST.value(),
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,null);
+        problemDetail.setTitle("BAD_REQUEST");
+        problemDetail.setProperty("Time Stamp", LocalDateTime.now());
+        problemDetail.setProperty("Errors",errors);
+        return problemDetail;
     }
 
+
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getConstraintViolations().forEach(violation ->
-                errors.put(violation.getPropertyPath().toString(), violation.getMessage())
-        );
-        ErrorResponse errorResponse = new ErrorResponse(
-                errors.toString(),
+    public ProblemDetail constraintViolationException (ConstraintViolationException e){
+        HashMap<String,String> errors = new HashMap<>();
+        for(ConstraintViolation<?> error : e.getConstraintViolations()){
+            errors.put(error.getPropertyPath().toString().substring(error.
+                                    getPropertyPath().
+                                    toString().
+                                    indexOf(".")+1).
+                            replaceFirst("\\.",""),
+                    error.getMessage());
+        }
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "Invalid Input");
+        problemDetail.setTitle("BAD_REQUEST");
+        problemDetail.setProperty("Time Stamp",LocalDateTime.now());
+        problemDetail.setProperty("Errors",errors);
+        return problemDetail;
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ErrorResponse jsonRequestException (HttpMessageNotReadableException e){
+        return new ErrorResponse(
+                "Error Json Input format",
                 HttpStatus.BAD_REQUEST.value(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PasswordException.class)
