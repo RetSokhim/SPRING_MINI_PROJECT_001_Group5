@@ -1,6 +1,9 @@
 package org.example.spring_mini_project.service.serviceimpl;
 
+import org.example.spring_mini_project.exception.BadRequestException;
+import org.example.spring_mini_project.exception.NotFoundException;
 import org.example.spring_mini_project.model.entity.*;
+import org.example.spring_mini_project.model.enumeration.SortArticle;
 import org.example.spring_mini_project.model.enumeration.SortDirection;
 import org.example.spring_mini_project.model.request.ArticleRequest;
 import org.example.spring_mini_project.model.request.CommentRequest;
@@ -42,13 +45,16 @@ public class ArticleServiceImplement implements ArticleService {
     @Transactional
     public ArticleResponse createNewCategory(ArticleRequest articleRequest) {
         Article article = articleRequest.toArticle();
+        if(articleRequest.getCategoryId().isEmpty()) {
+            throw new BadRequestException("Category id cannot be empty");
+        }
         User user = userRepository.findUserByEmail(getCurrentUserEmail());
         article.setUser(user);
         articleRepository.save(article);
         List<CategoryArticle> categoryArticles = articleRequest.getCategoryId().stream()
                 .map(categoryId -> {
                     Category category = categoryRepository.findById(categoryId)
-                            .orElseThrow(() -> new RuntimeException("Category not found"));
+                            .orElseThrow(() -> new NotFoundException("Category id "+ categoryId +" not found"));
                     CategoryArticle categoryArticle = new CategoryArticle();
                     categoryArticle.setArticle(article);
                     categoryArticle.setCategory(category);
@@ -68,7 +74,7 @@ public class ArticleServiceImplement implements ArticleService {
 
     @Override
     public ArticleResponse getArticleById(Long articleId) {
-        Article article = articleRepository.findById(articleId).orElseThrow();
+        Article article = articleRepository.findById(articleId).orElseThrow(() -> new NotFoundException("Article id "+ articleId+" not found"));
         ArticleResponse articleResponse = article.toResponse();
         articleResponse.setCategoryList(categoryArticleRepository.findCategoryIdByArticleId(articleId));
         List<CommentResponse> commentResponses = commentRepository.findCommentsByArticleArticleId(article.getArticleId())
@@ -80,9 +86,12 @@ public class ArticleServiceImplement implements ArticleService {
     }
 
     @Override
-    public List<ArticleResponse> getAllArticle(Integer pageNumber, Integer pageSize, String sortBy, SortDirection sortDirection) {
+    public List<ArticleResponse> getAllArticle(Integer pageNumber, Integer pageSize, SortArticle sortBy, SortDirection sortDirection) {
+        if(pageNumber <=0 || pageSize <=0) {
+            throw new BadRequestException("Must be greater than 0");
+        }
         Sort sort = sortDirection.name().equalsIgnoreCase(Sort.Direction.ASC.name())?
-                Sort.by(sortBy).ascending():Sort.by(sortBy).descending();
+                Sort.by(sortBy.name()).ascending():Sort.by(sortBy.name()).descending();
         Pageable pageable = PageRequest.of(pageNumber-1,pageSize,sort);
         List<Article> articles = articleRepository.findAll(pageable).getContent();
         return articles.stream().map(article -> {
@@ -97,8 +106,9 @@ public class ArticleServiceImplement implements ArticleService {
     }
 
     @Override
+    @Transactional
     public ArticleResponse updateArticleById(ArticleRequest articleRequest, Long articleId) {
-        Article article = articleRepository.findById(articleId).orElseThrow();
+        Article article = articleRepository.findById(articleId).orElseThrow((() -> new NotFoundException("Article id "+ articleId+" not found")));
         article.setTitle(articleRequest.getTitle());
         article.setDescription(articleRequest.getDescription());
         article.setUpdatedAt(LocalDateTime.now());
@@ -106,7 +116,7 @@ public class ArticleServiceImplement implements ArticleService {
         categoryArticleRepository.deleteByArticleArticleId(articleId);
         List<CategoryArticle> categoryArticles = articleRequest.getCategoryId().stream()
                 .map(categoryId->{
-                    Category category = categoryRepository.findById(categoryId).orElseThrow();
+                    Category category = categoryRepository.findById(categoryId).orElseThrow((() -> new NotFoundException("Article id "+ categoryId+" not found")));
                     CategoryArticle categoryArticle = new CategoryArticle();
                     categoryArticle.setCategory(category);
                     categoryArticle.setArticle(article);
@@ -127,17 +137,16 @@ public class ArticleServiceImplement implements ArticleService {
 
     @Override
     public void deleteArticleById(Long articleId) {
+        Article article = articleRepository.findById(articleId).orElseThrow(()->new NotFoundException("Article id "+ articleId+" not found"));
         articleRepository.deleteById(articleId);
     }
 
     @Override
     public ArticleResponse postCommentToArticle(Long articleId, CommentRequest commentRequest) {
-        Article article = articleRepository.findById(articleId).orElseThrow();
-        System.out.println("Hello 1");
+        Article article = articleRepository.findById(articleId).orElseThrow(()->new NotFoundException("Article id "+ articleId+" not found"));
         Comment comment = commentRequest.toComment();
         comment.setArticle(article);
         comment.setUser(userRepository.findUserByEmail(getCurrentUserEmail()));
-        System.out.println("Hello 2");
         commentRepository.save(comment);
         CommentResponse commentResponse = comment.toResponse();
         List<CommentResponse> commentResponses = new ArrayList<>();

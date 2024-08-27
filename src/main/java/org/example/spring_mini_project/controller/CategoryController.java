@@ -2,7 +2,9 @@ package org.example.spring_mini_project.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.example.spring_mini_project.model.enumeration.Role;
+import org.example.spring_mini_project.model.enumeration.SortCategory;
 import org.example.spring_mini_project.model.enumeration.SortDirection;
 import org.example.spring_mini_project.model.request.CategoryRequest;
 import org.example.spring_mini_project.model.request.UserRegisterRequest;
@@ -44,9 +46,9 @@ public class CategoryController {
     }
 
     @GetMapping("/get-all-category")
-    public ResponseEntity<?> getAllCategories(@RequestParam Integer pageNumber,
-                                              @RequestParam Integer pageSize,
-                                              @RequestParam String sortBy,
+    public ResponseEntity<?> getAllCategories(@RequestParam(defaultValue = "1") Integer pageNumber,
+                                              @RequestParam(defaultValue = "5") Integer pageSize,
+                                              @RequestParam SortCategory sortBy,
                                               @RequestParam SortDirection sortDirection
                                               ) {
         List<CategoryResponse> categoryResponses = categoryService.getAllCategories(pageNumber,pageSize,sortBy,sortDirection);
@@ -56,7 +58,7 @@ public class CategoryController {
     }
 
     @PutMapping("/update-category/{categoryId}")
-    public ResponseEntity<?> updateCategoryById(@RequestBody CategoryRequest categoryRequest,@PathVariable Long categoryId) {
+    public ResponseEntity<?> updateCategoryById(@Valid @RequestBody CategoryRequest categoryRequest,@PathVariable Long categoryId) {
         CategoryResponse categoryResponse = categoryService.updateCategoryById(categoryId,categoryRequest);
         return new ResponseEntity<>(new ApiResponse<>("Updated category with ID : "+categoryId+" Successfully",
                 HttpStatus.OK,categoryResponse,200, LocalDateTime.now()

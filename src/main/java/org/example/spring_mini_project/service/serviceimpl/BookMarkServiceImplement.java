@@ -11,6 +11,7 @@ import org.example.spring_mini_project.model.enumeration.SortDirection;
 import org.example.spring_mini_project.model.response.BookMarkResponse;
 import org.example.spring_mini_project.repository.ArticleRepository;
 import org.example.spring_mini_project.repository.BookMarkRepository;
+import org.example.spring_mini_project.repository.UserRepository;
 import org.example.spring_mini_project.service.BookMarkService;
 import org.example.spring_mini_project.service.UserService;
 import org.springframework.data.domain.Page;
@@ -28,11 +29,13 @@ public class BookMarkServiceImplement implements BookMarkService {
     private final BookMarkRepository bookMarkRepository;
     private final ArticleRepository articleRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
-    public BookMarkServiceImplement(BookMarkRepository bookMarkRepository, ArticleRepository articleRepository, UserService userService) {
+    public BookMarkServiceImplement(BookMarkRepository bookMarkRepository, ArticleRepository articleRepository, UserService userService, UserRepository userRepository) {
         this.bookMarkRepository = bookMarkRepository;
         this.articleRepository = articleRepository;
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
 
@@ -40,6 +43,7 @@ public class BookMarkServiceImplement implements BookMarkService {
     public Object markArticleToBookMark(Long articleId) {
         Long userId = userService.getCurrentUser().getUserId();
         articleRepository.findById(articleId).orElseThrow(() -> new NotFoundException("Article id not found"));
+        Optional<Article> article = articleRepository.findById(articleId);
         Optional<BookMark> existingBookMark = bookMarkRepository.findByArticle_ArticleIdAndUser_UserId(articleId, userId);
         if (existingBookMark.isPresent()) {
             //update
@@ -55,8 +59,8 @@ public class BookMarkServiceImplement implements BookMarkService {
         } else {
             //add new
             BookMark bookMark = new BookMark();
-            bookMark.setUser(bookMark.getUser());
-            bookMark.setArticle(bookMark.getArticle());
+            bookMark.setUser(userRepository.findById(userId).get());
+            bookMark.setArticle(article.get());
             bookMark.setStatus(true);
             bookMark.setCreatedAt(LocalDateTime.now());
             bookMark.setUpdatedAt(LocalDateTime.now());
@@ -68,7 +72,7 @@ public class BookMarkServiceImplement implements BookMarkService {
     @Override
     public Object unMarkedArticleFromBookMark(Long articleId) {
         Long userId = userService.getCurrentUser().getUserId();
-        articleRepository.findById(articleId).orElseThrow(() -> new NotFoundException("Article id not found."));
+        articleRepository.findById(articleId).orElseThrow(() -> new NotFoundException("Article id marked not found."));
         Optional<BookMark> bookMark = bookMarkRepository.findByArticle_ArticleIdAndUser_UserId(articleId, userId);
         if (bookMark.isPresent()) {
             BookMark bookMark1 = bookMark.get();
@@ -79,7 +83,7 @@ public class BookMarkServiceImplement implements BookMarkService {
                 return null;
             }
             if (bookMark1.getStatus().equals(false)) {
-                throw new NotFoundException("Article id not found.");
+                throw new NotFoundException("Article id marked not found.");
             }
         }
         return null;

@@ -1,8 +1,11 @@
 package org.example.spring_mini_project.service.serviceimpl;
 
+import org.example.spring_mini_project.exception.BadRequestException;
+import org.example.spring_mini_project.exception.NotFoundException;
 import org.example.spring_mini_project.model.entity.Category;
 import org.example.spring_mini_project.model.entity.Comment;
 import org.example.spring_mini_project.model.entity.User;
+import org.example.spring_mini_project.model.enumeration.SortCategory;
 import org.example.spring_mini_project.model.enumeration.SortDirection;
 import org.example.spring_mini_project.model.request.CategoryRequest;
 import org.example.spring_mini_project.model.response.ArticleResponse;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryServiceImplement implements CategoryService {
@@ -27,6 +31,7 @@ public class CategoryServiceImplement implements CategoryService {
     private final CategoryArticleRepository categoryArticleRepository;
     private final ArticleRepository articleRepository;
     private final CommentRepository commentRepository;
+
     public CategoryServiceImplement(CategoryRepository categoryRepository, UserRepository userRepository, CategoryArticleRepository categoryArticleRepository, ArticleRepository articleRepository, CommentRepository commentRepository) {
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
@@ -48,7 +53,10 @@ public class CategoryServiceImplement implements CategoryService {
 
     @Override
     public CategoryResponse getCategoryById(Long categoryId) {
-        Category category = categoryRepository.findCategoryByUserEmailAndCategoryId(getUserCurrentEmail(),categoryId);
+        Category category = categoryRepository.findCategoryByUserEmailAndCategoryId(getUserCurrentEmail(), categoryId);
+        if (category == null) {
+            throw new NotFoundException("Category id " + categoryId + " not found");
+        }
         CategoryResponse categoryResponse = category.toResponse();
         categoryResponse.setAmountOfArticle(categoryArticleRepository.countAllByCategoryCategoryId(categoryId));
         List<ArticleResponse> articleResponses = toArticleResponses();
@@ -61,19 +69,22 @@ public class CategoryServiceImplement implements CategoryService {
                 .stream().map(article -> {
                     ArticleResponse articleResponse = article.toResponse();
                     List<CommentResponse> commentResponses = commentRepository.findCommentsByArticleArticleId(article.getArticleId())
-                                    .stream().map(Comment::toResponse).toList();
+                            .stream().map(Comment::toResponse).toList();
                     articleResponse.setComments(commentResponses);
                     return articleResponse;
                 }).toList();
     }
 
     @Override
-    public List<CategoryResponse> getAllCategories(Integer pageNumber, Integer pageSize, String sortBy, SortDirection sortDirection) {
-        Sort sort = sortDirection.name().equalsIgnoreCase(Sort.Direction.ASC.name())?
-                Sort.by(sortBy).ascending():Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNumber-1,pageSize,sort);
+    public List<CategoryResponse> getAllCategories(Integer pageNumber, Integer pageSize, SortCategory sortBy, SortDirection sortDirection) {
+        if (pageNumber <= 0 || pageSize <= 0) {
+            throw new BadRequestException("Must be greater than 0");
+        }
+        Sort sort = sortDirection.name().equalsIgnoreCase(Sort.Direction.ASC.name()) ?
+                Sort.by(sortBy.name()).ascending() : Sort.by(sortBy.name()).descending();
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sort);
 
-        return categoryRepository.findAllByUserEmail(pageable,getUserCurrentEmail())
+        return categoryRepository.findAllByUserEmail(pageable, getUserCurrentEmail())
                 .getContent().stream().map(category -> {
                     toArticleResponses();
                     CategoryResponse categoryResponse = category.toResponse();
@@ -85,7 +96,7 @@ public class CategoryServiceImplement implements CategoryService {
 
     @Override
     public CategoryResponse updateCategoryById(Long categoryId, CategoryRequest categoryRequest) {
-        Category category = categoryRepository.findCategoryByCategoryIdAndUserEmail(categoryId,getUserCurrentEmail()).orElseThrow();
+        Category category = categoryRepository.findCategoryByCategoryIdAndUserEmail(categoryId, getUserCurrentEmail()).orElseThrow(() -> new NotFoundException("Category id " + categoryId + " not found"));
         category.setUpdatedAt(LocalDateTime.now());
         category.setCategoryName(categoryRequest.getCategoryName());
         CategoryResponse categoryResponse = categoryRepository.save(category).toResponse();
@@ -95,10 +106,12 @@ public class CategoryServiceImplement implements CategoryService {
 
     @Override
     public void deleteCategoryById(Long categoryId) {
-        categoryRepository.deleteCategoryByUserEmailAndCategoryId(getUserCurrentEmail(),categoryId);
+        Optional<Category> category = Optional.ofNullable(Optional.ofNullable(categoryRepository.findCategoryByUserEmailAndCategoryId(getUserCurrentEmail(), categoryId)).orElseThrow(() -> new NotFoundException("Category id " + categoryId + " not found.")));
+        categoryArticleRepository.deleteById(categoryId);
+        categoryRepository.deleteCategoryByUserEmailAndCategoryId(getUserCurrentEmail(), categoryId);
     }
 
-    public String getUserCurrentEmail(){
+    public String getUserCurrentEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
     }
