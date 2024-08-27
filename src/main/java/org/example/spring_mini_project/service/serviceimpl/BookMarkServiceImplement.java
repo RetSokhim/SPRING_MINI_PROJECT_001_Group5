@@ -1,5 +1,6 @@
 package org.example.spring_mini_project.service.serviceimpl;
 
+import org.example.spring_mini_project.exception.BadRequestException;
 import org.example.spring_mini_project.exception.ConflictException;
 import org.example.spring_mini_project.exception.NotFoundException;
 import org.example.spring_mini_project.model.entity.Article;
@@ -79,7 +80,7 @@ public class BookMarkServiceImplement implements BookMarkService {
                 return null;
             }
             if (bookMark1.getStatus().equals(false)) {
-                throw new NotFoundException("Article id not marked.");
+                throw new NotFoundException("Article id not found.");
             }
         }
         return null;
@@ -87,6 +88,9 @@ public class BookMarkServiceImplement implements BookMarkService {
 
     @Override
     public List<BookMarkResponse> getAllBookMark(Integer pageNo, Integer pageSize, SortArticle sortBy, SortDirection sortDirection) {
+        if(pageNo <= 0 || pageSize <= 0) {
+            throw new BadRequestException("Must be greater than 0");
+        }
         Sort.Direction direction = sortDirection == SortDirection.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, direction, sortBy.name());
         Page<Article> articles = articleRepository.findAll(pageable);

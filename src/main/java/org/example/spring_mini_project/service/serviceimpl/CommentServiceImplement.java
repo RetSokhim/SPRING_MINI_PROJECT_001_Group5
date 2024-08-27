@@ -1,5 +1,6 @@
 package org.example.spring_mini_project.service.serviceimpl;
 
+import org.example.spring_mini_project.exception.BadRequestException;
 import org.example.spring_mini_project.exception.ForbiddenException;
 import org.example.spring_mini_project.exception.NotFoundException;
 import org.example.spring_mini_project.model.entity.Comment;

@@ -1,6 +1,8 @@
 package org.example.spring_mini_project.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.example.spring_mini_project.model.enumeration.SortArticle;
 import org.example.spring_mini_project.model.enumeration.SortDirection;
 import org.example.spring_mini_project.model.response.ApiResponse;
@@ -33,7 +35,7 @@ public class BookMarkController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
     @PostMapping("/{articleId}")
-    public ResponseEntity<?> markArticleToBookMark(@PathVariable Long articleId) {
+    public ResponseEntity<?> markArticleToBookMark( @PathVariable Long articleId) {
         ApiResponse<?> response = new ApiResponse<>(
                 "Add article id "+articleId+" to bookmark successfully",
                 HttpStatus.OK,

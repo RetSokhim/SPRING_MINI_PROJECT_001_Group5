@@ -1,5 +1,7 @@
 package org.example.spring_mini_project.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.example.spring_mini_project.model.request.CommentRequest;
 import org.example.spring_mini_project.model.response.ApiResponse;
 import org.example.spring_mini_project.service.CommentService;
@@ -42,7 +44,7 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCommentById(@PathVariable Long id, @RequestBody CommentRequest commentRequest) {
+    public ResponseEntity<?> updateCommentById(@PathVariable Long id,@Valid @RequestBody CommentRequest commentRequest) {
         ApiResponse<?> response = new ApiResponse<>(
                 "Get comment by id successfully",
                 HttpStatus.OK,
