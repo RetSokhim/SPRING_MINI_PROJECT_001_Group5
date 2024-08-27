@@ -1,6 +1,9 @@
 package org.example.spring_mini_project.service.serviceimpl;
 
 import jakarta.transaction.Transactional;
+import org.example.spring_mini_project.exception.ConflictException;
+import org.example.spring_mini_project.exception.NotFoundException;
+import org.example.spring_mini_project.exception.PasswordException;
 import org.example.spring_mini_project.model.entity.CustomUserDetail;
 import org.example.spring_mini_project.model.entity.User;
 import org.example.spring_mini_project.model.enumeration.Role;
@@ -35,6 +38,10 @@ public class UserServiceImplement implements UserService {
     public UserRegisterResponse createNewUser(UserRegisterRequest userRegisterRequest, Role role) {
         User user = userRegisterRequest.toUser(role);
         user.setPassword(passwordEncoder.encode(userRegisterRequest.getPassword()));
+        userRepository.findUserByEmail(user.getEmail());
+        if(user.getEmail().equals(userRegisterRequest.getEmail())){
+            throw new ConflictException("Email is already exist");
+        }
         userRepository.save(user);
         return new UserRegisterResponse(user);
     }
@@ -42,7 +49,6 @@ public class UserServiceImplement implements UserService {
     @Transactional
     public UserRegisterResponse updateCurrentUser(UserRegisterRequest userRegisterRequest, Role role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
 
@@ -78,6 +84,15 @@ public class UserServiceImplement implements UserService {
     }
 
     @Override
+    public User getUserByEmail(String email) throws PasswordException {
+        User user = userRepository.findUserByEmail(email);
+        if(user == null){
+            throw new PasswordException("No user with this email");
+        }
+        return user;
+    }
+
+    @Override
     public UserRegisterResponse getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -87,9 +102,17 @@ public class UserServiceImplement implements UserService {
             if (principal instanceof UserDetails) {
                 String username = ((UserDetails) principal).getUsername();
                 User user = userRepository.findUserByEmail(username);
-                return new UserRegisterResponse(user);
+
+                if (user != null) {
+                    return new UserRegisterResponse(user);
+                } else {
+                    throw new NotFoundException("User not found in the database");
+                }
+            } else {
+                throw new NotFoundException("Principal is not an instance of UserDetails");
             }
+        } else {
+            throw new NotFoundException("User not authenticated");
         }
-        throw new UsernameNotFoundException("User not found or not authenticated");
     }
 }
