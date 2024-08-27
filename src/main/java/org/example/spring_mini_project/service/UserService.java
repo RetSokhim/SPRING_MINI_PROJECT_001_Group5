@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
     UserRegisterResponse createNewUser(UserRegisterRequest userRegisterRequest, Role role);
-    Long getCurrentUser();
-    UserRegisterResponse getUserInfo();
+
+    UserRegisterResponse getCurrentUser();
+
+    UserRegisterResponse updateCurrentUser(UserRegisterRequest userRegisterRequest, Role role);
 }

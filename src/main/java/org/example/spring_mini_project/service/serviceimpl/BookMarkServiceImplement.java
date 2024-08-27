@@ -37,7 +37,7 @@ public class BookMarkServiceImplement implements BookMarkService {
 
     @Override
     public Object markArticleToBookMark(Long articleId) {
-        Long userId = userService.getCurrentUser();
+        Long userId = userService.getCurrentUser().getUserId();
         articleRepository.findById(articleId).orElseThrow(() -> new NotFoundException("Article id not found"));
         Optional<BookMark> existingBookMark = bookMarkRepository.findByArticle_ArticleIdAndUser_UserId(articleId, userId);
         if (existingBookMark.isPresent()) {
@@ -66,7 +66,7 @@ public class BookMarkServiceImplement implements BookMarkService {
 
     @Override
     public Object unMarkedArticleFromBookMark(Long articleId) {
-        Long userId = userService.getCurrentUser();
+        Long userId = userService.getCurrentUser().getUserId();
         articleRepository.findById(articleId).orElseThrow(() -> new NotFoundException("Article id not found."));
         Optional<BookMark> bookMark = bookMarkRepository.findByArticle_ArticleIdAndUser_UserId(articleId,userId);
         if (bookMark.isPresent()) {
