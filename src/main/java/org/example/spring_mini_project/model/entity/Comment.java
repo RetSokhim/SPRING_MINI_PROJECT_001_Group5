@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.spring_mini_project.model.response.CommentResponse;
 
 import java.time.LocalDateTime;
 
@@ -27,4 +28,10 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "article_id")
     private Article article;
+
+    public CommentResponse toResponse(){
+        return new CommentResponse(this.commentId,this.cmt,this.createdAt,this.user.toResponse(),this.updatedAt);
+    }
+
+
 }
