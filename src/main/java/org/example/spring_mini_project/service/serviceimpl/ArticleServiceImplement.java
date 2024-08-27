@@ -1,6 +1,7 @@
 package org.example.spring_mini_project.service.serviceimpl;
 
 import org.example.spring_mini_project.exception.BadRequestException;
+import org.example.spring_mini_project.exception.ForbiddenException;
 import org.example.spring_mini_project.exception.NotFoundException;
 import org.example.spring_mini_project.model.entity.*;
 import org.example.spring_mini_project.model.enumeration.SortArticle;
@@ -31,14 +32,16 @@ public class ArticleServiceImplement implements ArticleService {
     private final CategoryRepository categoryRepository;
     private final CategoryArticleRepository categoryArticleRepository;
     private final CommentRepository commentRepository;
+    private final UserServiceImplement userServiceImplement;
 
     public ArticleServiceImplement(ArticleRepository articleRepository, UserRepository userRepository,
-                                   CategoryRepository categoryRepository, CategoryArticleRepository categoryArticleRepository, CommentRepository commentRepository) {
+                                   CategoryRepository categoryRepository, CategoryArticleRepository categoryArticleRepository, CommentRepository commentRepository, UserServiceImplement userServiceImplement) {
         this.articleRepository = articleRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.categoryArticleRepository = categoryArticleRepository;
         this.commentRepository = commentRepository;
+        this.userServiceImplement = userServiceImplement;
     }
 
     @Override
@@ -137,8 +140,14 @@ public class ArticleServiceImplement implements ArticleService {
 
     @Override
     public void deleteArticleById(Long articleId) {
+        Long userId = userServiceImplement.getCurrentUser().getUserId();
         Article article = articleRepository.findById(articleId).orElseThrow(()->new NotFoundException("Article id "+ articleId+" not found"));
-        articleRepository.deleteById(articleId);
+        if(article.getUser().getUserId().equals(userId)) {
+            articleRepository.deleteById(articleId);
+        }else {
+            throw new ForbiddenException("You do not have permission to delete this article");
+        }
+
     }
 
     @Override
