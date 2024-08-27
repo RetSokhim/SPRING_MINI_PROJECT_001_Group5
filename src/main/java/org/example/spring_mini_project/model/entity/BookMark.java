@@ -1,18 +1,20 @@
 package org.example.spring_mini_project.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.example.spring_mini_project.model.response.BookMarkResponse;
+import org.example.spring_mini_project.model.response.CommentResponse;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "bookmark")
+@ToString
 public class BookMark {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +29,5 @@ public class BookMark {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
 }

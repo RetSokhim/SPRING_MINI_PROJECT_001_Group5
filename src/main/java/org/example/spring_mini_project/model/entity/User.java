@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.spring_mini_project.model.enumeration.Role;
+import org.example.spring_mini_project.model.response.UserDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,4 +39,17 @@ public class User {
     private List<Category> categories;
     @OneToMany(mappedBy = "user")
     private List<Article> articles;
+
+
+    public UserDTO toResponseDTO(){
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUserId(userId);
+        userDTO.setUsername(username);
+        userDTO.setAddress(address);
+        userDTO.setPhoneNumber(phoneNumber);
+        userDTO.setEmail(email);
+        userDTO.setRole(role);
+        userDTO.setCreatedAt(createdAt);
+        return userDTO;
+    }
 }
