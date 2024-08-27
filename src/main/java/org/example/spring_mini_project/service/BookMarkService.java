@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface BookMarkService {
     Object markArticleToBookMark(Long articleId);
-
     Object unMarkedArticleFromBookMark(Long articleId);
-
     List<BookMarkResponse> getAllBookMark(Integer pageNo, Integer pageSize, SortArticle sortBy, SortDirection sortDirection);
 }

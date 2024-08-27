@@ -20,6 +20,6 @@ public class CommentRequest {
     @Pattern(regexp = "^[^\\s].*$", message = "Must not start with a space")
     private String comment;
     public Comment toComment(){
-        return new Comment(null,this.comment.trim().replaceAll("//s+",""), LocalDateTime.now(),null,null,null);
+        return new Comment(null,this.comment.trim().replaceAll("\\s+"," "), LocalDateTime.now(),null,null,null);
     }
 }

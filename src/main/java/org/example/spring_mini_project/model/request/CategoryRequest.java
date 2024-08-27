@@ -21,6 +21,6 @@ public class CategoryRequest {
     @Pattern(regexp = "^[^\\s].*$", message = "Must not start with a space")
     private String categoryName;
     public Category toCategory(){
-        return new Category(null,this.categoryName.trim().replaceAll("//s+",""), LocalDateTime.now(),null,null,null);
+        return new Category(null,this.categoryName.trim().replaceAll("\\s+"," "), LocalDateTime.now(),null,null,null);
     }
 }

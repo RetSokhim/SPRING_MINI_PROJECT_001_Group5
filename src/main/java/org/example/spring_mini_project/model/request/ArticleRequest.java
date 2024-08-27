@@ -30,6 +30,6 @@ public class ArticleRequest {
     private List<Long> categoryId;
 
     public Article toArticle(){
-        return new Article(null,this.title.trim().replaceAll("//s+",""),this.description.trim().replaceAll("//s+",""), LocalDateTime.now(),null,null,null,null,null);
+        return new Article(null,this.title.trim().replaceAll("\\s+"," "),this.description.trim().replaceAll("//s+",""), LocalDateTime.now(),null,null,null,null,null);
     }
 }
