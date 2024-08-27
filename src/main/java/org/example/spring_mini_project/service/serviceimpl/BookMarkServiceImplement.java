@@ -5,9 +5,10 @@ import org.example.spring_mini_project.exception.ConflictException;
 import org.example.spring_mini_project.exception.NotFoundException;
 import org.example.spring_mini_project.model.entity.Article;
 import org.example.spring_mini_project.model.entity.BookMark;
+import org.example.spring_mini_project.model.entity.User;
 import org.example.spring_mini_project.model.enumeration.SortArticle;
 import org.example.spring_mini_project.model.enumeration.SortDirection;
-import org.example.spring_mini_project.model.response.ArticleResponse;
+import org.example.spring_mini_project.model.response.BookMarkResponse;
 import org.example.spring_mini_project.repository.ArticleRepository;
 import org.example.spring_mini_project.repository.BookMarkRepository;
 import org.example.spring_mini_project.service.BookMarkService;
@@ -28,7 +29,7 @@ public class BookMarkServiceImplement implements BookMarkService {
     private final ArticleRepository articleRepository;
     private final UserService userService;
 
-    public BookMarkServiceImplement(BookMarkRepository bookMarkRepository,ArticleRepository articleRepository, UserService userService) {
+    public BookMarkServiceImplement(BookMarkRepository bookMarkRepository, ArticleRepository articleRepository, UserService userService) {
         this.bookMarkRepository = bookMarkRepository;
         this.articleRepository = articleRepository;
         this.userService = userService;
@@ -68,7 +69,7 @@ public class BookMarkServiceImplement implements BookMarkService {
     public Object unMarkedArticleFromBookMark(Long articleId) {
         Long userId = userService.getCurrentUser().getUserId();
         articleRepository.findById(articleId).orElseThrow(() -> new NotFoundException("Article id not found."));
-        Optional<BookMark> bookMark = bookMarkRepository.findByArticle_ArticleIdAndUser_UserId(articleId,userId);
+        Optional<BookMark> bookMark = bookMarkRepository.findByArticle_ArticleIdAndUser_UserId(articleId, userId);
         if (bookMark.isPresent()) {
             BookMark bookMark1 = bookMark.get();
             if (bookMark1.getStatus().equals(true)) {
@@ -85,15 +86,18 @@ public class BookMarkServiceImplement implements BookMarkService {
     }
 
     @Override
-    public List<ArticleResponse> getAllBookMark(Integer pageNo, Integer pageSize, SortArticle sortBy, SortDirection sortDirection) {
-        if(pageNo <= 0 || pageSize <= 0) {
+    public List<BookMarkResponse> getAllBookMark(Integer pageNo, Integer pageSize, SortArticle sortBy, SortDirection sortDirection) {
+        Long userId = userService.getCurrentUser().getUserId();
+        if (pageNo <= 0 || pageSize <= 0) {
             throw new BadRequestException("Must be greater than 0");
         }
         Sort.Direction direction = sortDirection == SortDirection.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, direction, sortBy.name());
         Page<Article> articles = articleRepository.findAll(pageable);
-        return articles.stream().filter(article ->
-                article.getBookMark().stream().anyMatch(bookMark -> bookMark.getStatus().equals(true))
-        ).map(Article::toResponse).toList();
+        return articles.stream()
+                .filter(article -> article.getBookMark().stream()
+                        .anyMatch(bookMark -> bookMark.getStatus().equals(true) && bookMark.getUser().getUserId().equals(userId)))
+                .map(Article::toResponseBookmark)
+                .toList();
     }
 }

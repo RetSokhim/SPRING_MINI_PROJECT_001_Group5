@@ -27,14 +27,14 @@ public class Article {
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @OneToMany(mappedBy = "article",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "article",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<CategoryArticle> categoryArticles;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "article",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "article",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<BookMark> bookMark;
-    @OneToMany(mappedBy = "article",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "article",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<Comment> comment;
 
     public ArticleResponse toResponse(){
