@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class UserServiceImplement implements UserService {
@@ -40,9 +41,9 @@ public class UserServiceImplement implements UserService {
     public UserRegisterResponse createNewUser(UserRegisterRequest userRegisterRequest, Role role) {
         User user = userRegisterRequest.toUser(role);
         user.setPassword(passwordEncoder.encode(userRegisterRequest.getPassword()));
-        userRepository.findUserByEmail(user.getEmail());
-        if(user.getEmail().equals(userRegisterRequest.getEmail())){
-            throw new ConflictException("Email is already exist");
+        Optional<User> existingUser = Optional.ofNullable(userRepository.findUserByEmail(user.getEmail()));
+        if (existingUser.isPresent()) {
+            throw new ConflictException("Email already exists");
         }
         userRepository.save(user);
         return new UserRegisterResponse(user);
