@@ -33,8 +33,10 @@ public class CommentServiceImplement implements CommentService {
     @Override
     public Comment deleteCommentById(Long id) {
         Comment comment = commentRepository.findById(id).orElseThrow(() -> new NotFoundException("Comment not found"));
+        if(!comment.getUser().getUserId().equals(userService.getCurrentUser().getUserId())) {
+            throw new ForbiddenException("You are not allowed to delete this comment");
+        }
         comment.setArticle(null);
-        comment.setUser(null);
         commentRepository.save(comment);
         commentRepository.deleteById(id);
         return null;
