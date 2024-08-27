@@ -1,7 +1,6 @@
 package org.example.spring_mini_project.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import org.example.spring_mini_project.model.request.CommentRequest;
 import org.example.spring_mini_project.model.response.ApiResponse;
 import org.example.spring_mini_project.service.CommentService;

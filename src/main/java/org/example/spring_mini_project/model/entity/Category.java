@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.spring_mini_project.model.response.CategoryResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,10 @@ public class Category {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CategoryArticle> categoryArticles;
+
+    public CategoryResponse toResponse(){
+        return new CategoryResponse(this.categoryId,this.categoryName.replaceAll("//s+",""),null,this.createdAt,null);
+    }
 }

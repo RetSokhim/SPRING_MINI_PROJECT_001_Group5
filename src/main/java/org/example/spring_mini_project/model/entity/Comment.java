@@ -22,20 +22,14 @@ public class Comment {
     private String cmt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "article_id")
     private Article article;
 
-    public CommentResponse toResponse() {
-        CommentResponse response = new CommentResponse();
-        response.setCommentId(commentId);
-        response.setCmt(cmt);
-        response.setCreatedAt(createdAt);
-        response.setUpdatedAt(updatedAt);
-        response.setUser(user.toResponseDTO());
-        return response;
+    public CommentResponse toResponse(){
+        return new CommentResponse(this.commentId,this.cmt,this.createdAt,this.user.toResponse(),this.updatedAt);
     }
 }

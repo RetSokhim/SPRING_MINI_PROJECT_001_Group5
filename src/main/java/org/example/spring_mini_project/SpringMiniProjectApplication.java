@@ -7,8 +7,10 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @SpringBootApplication
+@EntityScan(basePackages = {"org.example.spring_mini_project.model.entity"})
 @SecurityScheme(
         name = "bearerAuth",
         type = SecuritySchemeType.HTTP,

@@ -1,6 +1,5 @@
 package org.example.spring_mini_project.service.serviceimpl;
 
-import org.example.spring_mini_project.exception.BadRequestException;
 import org.example.spring_mini_project.exception.ForbiddenException;
 import org.example.spring_mini_project.exception.NotFoundException;
 import org.example.spring_mini_project.model.entity.Comment;
@@ -32,7 +31,7 @@ public class CommentServiceImplement implements CommentService {
 
     @Override
     public Comment deleteCommentById(Long id) {
-        Long userId = userService.getCurrentUser();
+        Long userId = userService.getCurrentUser().getUserId();
         Optional<Comment> comment = Optional.ofNullable(commentRepository.findById(id).orElseThrow(() -> new NotFoundException("Comment not found")));
         if (!comment.get().getUser().getUserId().equals(userId)) {
             throw new ForbiddenException("You do not have permission to delete this comment");
@@ -44,7 +43,7 @@ public class CommentServiceImplement implements CommentService {
 
     @Override
     public CommentResponse updateCommentById(Long id, CommentRequest commentRequest) {
-        Long userId = userService.getCurrentUser();
+        Long userId = userService.getCurrentUser().getUserId();
         Comment comment = commentRepository.findById(id).orElseThrow( () -> new NotFoundException("Comment not found"));
         if (!comment.getUser().getUserId().equals(userId)) {
             throw new ForbiddenException("You do not have permission to update this comment");

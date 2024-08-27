@@ -5,17 +5,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommentResponse {
-    private Long commentId;
-    private String cmt;
+public class ArticleResponse {
+    private Long articleId;
+    private String title;
+    private String description;
     private LocalDateTime createdAt;
-    private UserRegisterResponse user;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime updatedAt;
+    private Long ownerOfArticle;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<Long> categoryList;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<CommentResponse> comments;
 }

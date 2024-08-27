@@ -1,6 +1,7 @@
 package org.example.spring_mini_project.configuration;
 
 import lombok.AllArgsConstructor;
+import org.example.spring_mini_project.exception.CustomAccessDeniedHandler;
 import org.example.spring_mini_project.security.JwtAuthEntrypoint;
 import org.example.spring_mini_project.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +20,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfiguration {
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtAuthEntrypoint jwtAuthEntrypoint;
-
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -28,15 +29,20 @@ public class SecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(withDefaults()).csrf(AbstractHttpConfigurer::disable)
+                .cors(withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("api/v1/auth/**", "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
-                        .anyRequest(
-                        ).authenticated())
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthEntrypoint))
+                        .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/v1/article/create-article", "/api/v1/article/update-article/{articleId}", "/api/v1/article/delete-article/{articleId}",
+                                "api/v1/category/**"
+                                )
+                        .hasRole("AUTHOR") // Only AUTHOR can access these endpoints
+                        .requestMatchers("/api/v1/comment/**").hasAnyRole("AUTHOR", "READER") // AUTHOR and READER can access these endpoints
+                        .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtAuthEntrypoint) // For handling unauthenticated access
+                        .accessDeniedHandler(customAccessDeniedHandler) // For handling access denied due to roles
+                )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
